@@ -1,7 +1,6 @@
 package frc.team967.motors;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class SparkMaxBrushless967 extends CANSparkMax implements MotorController {
 

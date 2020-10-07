@@ -1,7 +1,6 @@
 package frc.team967.motors;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 public class TalonSRX967 extends TalonSRX implements MotorController {

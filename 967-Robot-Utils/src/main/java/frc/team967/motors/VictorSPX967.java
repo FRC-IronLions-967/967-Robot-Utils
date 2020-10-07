@@ -1,7 +1,6 @@
 package frc.team967.motors;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class VictorSPX967 extends VictorSPX implements MotorController {
