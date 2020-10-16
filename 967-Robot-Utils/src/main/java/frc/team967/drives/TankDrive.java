@@ -1,9 +1,6 @@
 package frc.team967.drives;
 
-import frc.team967.exceptions.MotorTypeMismatchException;
-import frc.team967.motors.*;
-
-public class ArcadeDrive {
+public class TankDrive {
     
     private boolean usingLookup = false;
     private double[] lookupTable;
@@ -11,10 +8,10 @@ public class ArcadeDrive {
     private MotorController[] rightControllers;
     private MotorController[] leftControllers;
 
-    // creates a new arcade drive with the given motor ids on each side
+    // creates a new TankDrive with the given motor ids on each side
     // only works if all of the drive uses the same type of motors
     // the MotorController at index 0 will be treated as the master
-    public ArcadeDrive(int[] leftIds, int[] rightIds, MotorTypes type) throws MotorTypeMismatchException {
+    public TankDrive(int[] leftIds, int[] rightIds, MotorTypes type) throws MotorTypeMismatchException {
         leftControllers = new MotorController[leftIds.length];
         rightControllers = new MotorController[rightIds.length];
 
@@ -62,10 +59,10 @@ public class ArcadeDrive {
 
     }
 
-    // constructor to create an ArcadeDrive with already initialized MotorController objects
+    // constructor to create an TankDrive with already initialized MotorController objects
     // use this if your drive train uses a mix of controllers, such as Talons with Victors
     // the MotorController at index 0 will be treated as the master controller
-    public ArcadeDrive(MotorController[] leftControllers, MotorController[] rightControllers) throws MotorTypeMismatchException {
+    public TankDrive(MotorController[] leftControllers, MotorController[] rightControllers) throws MotorTypeMismatchException {
         this.leftControllers = leftControllers;
         this.rightControllers = rightControllers;
 
@@ -103,19 +100,14 @@ public class ArcadeDrive {
         return rightControllers;
     }
 
-    public void arcadeDrive(double x, double y) {
-        double r, l;
+    public void tankDrive(double r, double l) {
 
         if(usingLookup) {
-            r = ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]) - ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]);
-            l = ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]) + ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]);
-        } else {
-            r = x - y;
-            l = x + y;
+            r = ((r > 0)) ? lookup[(int) Math.floor(Math.abs(r) * 100)] : -lookup[(int) Math.floor(Math.abs(r) * 100)];
+            l = ((l > 0)) ? lookup[(int) Math.floor(Math.abs(l) * 100)] : -lookup[(int) Math.floor(Math.abs(l) * 100)];
         }
 
         rightControllers[0].setPower(r);
         leftControllers[0].setPower(l);
     }
-
 }
