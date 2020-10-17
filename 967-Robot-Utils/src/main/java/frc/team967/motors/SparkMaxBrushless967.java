@@ -2,6 +2,8 @@ package frc.team967.motors;
 
 import com.revrobotics.CANSparkMax;
 
+import frc.team967.exceptions.MotorTypeMismatchException;
+
 public class SparkMaxBrushless967 extends CANSparkMax implements MotorController {
 
     public SparkMaxBrushless967(int id) {
@@ -15,9 +17,11 @@ public class SparkMaxBrushless967 extends CANSparkMax implements MotorController
     }
 
     @Override
-    public void follow(MotorController master) {
+    public void follow(MotorController master) throws MotorTypeMismatchException {
         if(master instanceof SparkMaxBrushless967) {
             super.follow((SparkMaxBrushless967) master);
+        } else {
+            throw new MotorTypeMismatchException("Incompatible motor type for SparkMAX");
         }
     }
 
