@@ -1,5 +1,8 @@
 package frc.team967.drives;
 
+import frc.team967.exceptions.*;
+import frc.team967.motors.*;
+
 public class TankDrive {
     
     private boolean usingLookup = false;
@@ -103,8 +106,8 @@ public class TankDrive {
     public void tankDrive(double r, double l) {
 
         if(usingLookup) {
-            r = ((r > 0)) ? lookup[(int) Math.floor(Math.abs(r) * 100)] : -lookup[(int) Math.floor(Math.abs(r) * 100)];
-            l = ((l > 0)) ? lookup[(int) Math.floor(Math.abs(l) * 100)] : -lookup[(int) Math.floor(Math.abs(l) * 100)];
+            r = ((r > 0)) ? lookupTable[(int) Math.floor(Math.abs(r) * 100)] : -lookupTable[(int) Math.floor(Math.abs(r) * 100)];
+            l = ((l > 0)) ? lookupTable[(int) Math.floor(Math.abs(l) * 100)] : -lookupTable[(int) Math.floor(Math.abs(l) * 100)];
         }
 
         rightControllers[0].setPower(r);
