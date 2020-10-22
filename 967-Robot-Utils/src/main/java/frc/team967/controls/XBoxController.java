@@ -1,6 +1,7 @@
 package frc.team967.controls;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
@@ -36,6 +37,14 @@ public class XBoxController extends Joystick {
         buttonMap.put("SELECT", new JoystickButton(this, 7));
         buttonMap.put("START", new JoystickButton(this, 8));
 
+        // this (hopefully) stops the issue where the program crashes if a button with no assigned command is pressed
+        Iterator buttonIterator = buttonMap.entrySet().iterator();
+        while(buttonIterator.hasNext()) {
+            JoystickButton button = (JoystickButton) buttonIterator.next();
+            button.whenPressed(new DoNothingCommand());
+            button.whenReleased(new DoNothingCommand());
+        }
+
         //initialize the POV buttons (the buttons on the dpad of the controller)
         //these constructor calls could be modified to take a 3rd argument that is their "POV value", which returns from another wpilib function, which I'm not using
         povMap.put("N", new POVButton(this, 0));
@@ -46,6 +55,13 @@ public class XBoxController extends Joystick {
         povMap.put("SW", new POVButton(this, 225));
         povMap.put("W", new POVButton(this, 270));
         povMap.put("NW", new POVButton(this, 315));
+
+        Iterator povIterator = povMap.entrySet().iterator();
+        while(povIterator.hasNext()) {
+            POVButton button = (POVButton) povIterator.next();
+            button.whenPressed(new DoNothingCommand());
+            button.whenPressed(new DoNothingCommand());
+        }
     }
 
     //assigns commands to buttons
