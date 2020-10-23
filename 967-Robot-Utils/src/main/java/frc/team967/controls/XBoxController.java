@@ -8,6 +8,11 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.Command;
 
+/*
+* @author nastark123
+* @version 1.0
+* @since 2020-10-22
+*/
 public class XBoxController extends Joystick {
     public static final int RIGHT_X_AXIS = 0;
     public static final int RIGHT_Y_AXIS = 1;
@@ -22,6 +27,12 @@ public class XBoxController extends Joystick {
     private HashMap<String, JoystickButton> buttonMap;
     private HashMap<String, POVButton> povMap;
 
+    /*
+    * Creates a new XBoxController with the specified id.  The id's are usually assigned in the same order that the
+    * controllers were plugged in.
+    * @param id The id of the controller being created.
+    * @return A new XBoxController instance with the specified id.
+    */
     public XBoxController(int id) {
         super(id);
         buttonMap = new HashMap<>();
@@ -64,70 +75,142 @@ public class XBoxController extends Joystick {
         }
     }
 
-    //assigns commands to buttons
+    /*
+    * Assigns a command to the button specified to be executed when the button is pressed.
+    * @param button The string representation of the button, e.g. "A", "B", "X", "Y", etc.
+    * @param command The command being assigned, see the wpilib docs for more details on commands.
+    * @return Nothing
+    */
     public void whenButtonPressed(String button, Command command) {
         buttonMap.get(button).whenPressed(command);
     }
 
+    /*
+    * Assigns a command to the button specified to be executed when the button is released.
+    * @param button The string representation of the button, e.g. "A", "B", "X", "Y", etc.
+    * @param command The command being assigned, see the wpilib docs for more details on commands.
+    * @return Nothing
+    */
     public void whenButtonReleased(String button, Command command) {
         buttonMap.get(button).whenReleased(command);
     }
 
+    /*
+    * Assigns a command to the POV button (the buttons on the DPad of the controller) specified to be executed when the button is pressed.
+    * @param button The string representation of the POV button, e.g. "N", "S", "E", "W", "NE", etc.
+    * @param command The command being assigned, see the wpilib docs for more details on commands.
+    * @return Nothing
+    */
     public void whenPOVButtonPressed(String button, Command command) {
         povMap.get(button).whenPressed(command);
     }
 
+    /*
+    * Assigns a command to the POV button (the buttons on the DPad of the controller) specified to be executed when the button is released.
+    * @param button The string representation of the POV button, e.g. "N", "S", "E", "W", "NE", etc.
+    * @param command The command being assigned, see the wpilib docs for more details on commands.
+    * @return Nothing.
+    */
     public void whenPOVButtonReleased(String button, Command command) {
         povMap.get(button).whenReleased(command);
     }
 
-    //returns whether the specified button is pressed
+    /*
+    * Checks whether the specified button is pressed
+    * @param button The string representation of the button, e.g. "A", "B", "X", "Y", etc.
+    * @return boolean This returns true if the button is pressed, false otherwise.
+    */
     public boolean isButtonPressed(String button) {
         return buttonMap.get(button).get();
     }
 
-    public boolean isAngleMatched(String povButton) {
+    /*
+    * Checks whether the specified POV button is pressed
+    * @param button The string representation of the POV button, e.g. "N", "S", "E", "W", "NE", etc.
+    * @return boolean This returns true if the button is pressed, false otherwise.
+    */
+    public boolean isPOVButtonPressed(String povButton) {
         return povMap.get(povButton).get();
     }
 
     //these get the value between -1.0 and 1.0 that represent the various joysticks
     //please note that the triggers only range between 0.0 and 1.0
+
+    /*
+    * Gets the value of the x-axis of the stick on the right of the controller.
+    * @return double The value of the x-axis of the right stick, which is between -1.0 and 1.0.
+    */
     public double getRightStickX() {
         return this.getRawAxis(RIGHT_X_AXIS);
     }
 
+    /*
+    * Gets the value of the y-axis of the stick on the right of the controller.
+    * @return double The value of the y-axis of the right stick, which is between -1.0 and 1.0.
+    */
     public double getRightStickY() {
         return this.getRawAxis(RIGHT_Y_AXIS);
     }
 
+    /*
+    * Gets the value of the trigger on the right of the controller.
+    * @return double The value of the trigger, which is between 0.0 and 1.0.
+    */
     public double getRightTrigger() {
         return this.getRawAxis(RIGHT_TRIGGER);
     }
 
+    /*
+    * Gets the value of the trigger on the left of the controller.
+    * @return double The value of the trigger, which is between 0.0 and 1.0.
+    */
     public double getLeftTrigger() {
         return this.getRawAxis(LEFT_TRIGGER);
     }
 
+    /*
+    * Gets the value of the x-axis of the stick on the left of the controller.
+    * @return double The value of the x-axis of the left stick, which is between -1.0 and 1.0.
+    */
     public double getLeftStickX() {
         return this.getRawAxis(LEFT_X_AXIS);
     }
 
+    /*
+    * Gets the value of the y-axis of the stick on the left of the controller.
+    * @return double The value of the y-axis of the left stick, which is between -1.0 and 1.0.
+    */
     public double getLeftStickY() {
         return this.getRawAxis(LEFT_Y_AXIS);
     }
 
+    /*
+    * Sets the value at which a trigger will return true from isTriggerPressed.
+    * @param newTolerance The new value for the trigger tolerance.
+    * @return Nothing.
+    * @see isTriggerPressed()
+    */
     public void setTriggerTolerance(double newTolerance) {
         newTolerance = (newTolerance < 0.0) ? 0.0 : (newTolerance > 1.0) ? 1.0 : newTolerance;
         triggerTolerance = newTolerance;
     }
 
+    /*
+    * Gets the current trigger tolerance
+    * @return double The trigger tolerance.
+    */
     public double getTriggerTolerance() {
         return triggerTolerance;
     }
 
-    //the triggers on the controller show up as axes, but a common function is to check whether they are pressed or not
-    //triggerTolerance can be set with setTriggerTolerance, and if the trigger is pressed that point, this returns true, otherwise false
+    /*
+    * Checks to see whether the trigger is pressed past the level of triggerTolerance.
+    * @param trigger The axis number assigned to the trigger, can be LEFT_TRIGGER or RIGHT_TRIGGER, or int itself.
+    * @return boolean true if the trigger is pressed past the tolerance, false otherwise.
+    */
     public boolean isTriggerPressed(int trigger) {
+        //the triggers on the controller show up as axes, but a common function is to check whether they are pressed or not
+        //triggerTolerance can be set with setTriggerTolerance, and if the trigger is pressed that point, this returns true, otherwise false
         if(trigger != 2 && trigger != 3) return false;
         return (this.getRawAxis(trigger) > triggerTolerance) ? true : false;
     }
