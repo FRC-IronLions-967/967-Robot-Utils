@@ -14,12 +14,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 * @since 2020-10-22
 */
 public class XBoxController extends Joystick {
-    public static final int RIGHT_X_AXIS = 0;
-    public static final int RIGHT_Y_AXIS = 1;
-    public static final int RIGHT_TRIGGER = 2;
-    public static final int LEFT_TRIGGER = 3;
-    public static final int LEFT_X_AXIS = 4;
-    public static final int LEFT_Y_AXIS = 5;
+    public static final int LEFT_X_AXIS = 0;
+    public static final int LEFT_Y_AXIS = 1;
+    public static final int LEFT_TRIGGER = 2;
+    public static final int RIGHT_TRIGGER = 3;
+    public static final int RIGHT_X_AXIS = 4;
+    public static final int RIGHT_Y_AXIS = 5;
 
     //this controls how far you have to press the trigger for it to register as pressed
     private double triggerTolerance = 0.25;
