@@ -2,6 +2,9 @@ package frc.team967.drives;
 
 import frc.team967.exceptions.MotorTypeMismatchException;
 import frc.team967.motors.*;
+import frc.team967.utils.Utils;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ArcadeDrive {
     
@@ -10,6 +13,8 @@ public class ArcadeDrive {
 
     private MotorController[] rightControllers;
     private MotorController[] leftControllers;
+
+    private double v = 0.0;
 
     // creates a new arcade drive with the given motor ids on each side
     // only works if all of the drive uses the same type of motors
@@ -107,13 +112,96 @@ public class ArcadeDrive {
         double r, l;
 
         if(usingLookup) {
-            r = ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]) - ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]);
-            l = ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]) + ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]);
+            r = ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]) - ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]);
+            l = ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]) + ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]);
         } else {
-            r = x - y;
-            l = x + y;
+            r = y - x;
+            l = y + x;
         }
 
+        // v doesn't affect this method at all, but it's being updated in case for some reason someone
+        // wanted to use both this and the differential methods in the same program
+        v = r + x;
+
+        rightControllers[0].setPower(r);
+        leftControllers[0].setPower(l);
+    }
+
+    // standard arcade drive, is the horizontal (steering) axis, and y is the vertical (drive) axis
+    // bear in mind that most controllers, such as XBox controllers are inverted on the vertical axis
+    // of the analog sticks, so you may have to adjust for that
+    public void arcadeDrive(double x, double y, double deadband) {
+        x = Utils.deadband(x, deadband);
+        y = Utils.deadband(y, deadband);
+
+        double r, l;
+
+        if(usingLookup) {
+            r = ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]) - ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]);
+            l = ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]) + ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]);
+        } else {
+            r = y - x;
+            l = y + x;
+        }
+
+        v = r + x;
+
+        rightControllers[0].setPower(r);
+        leftControllers[0].setPower(l);
+    }
+
+    // puts a max limit on how fast the robot can accelerate, both positively and negatively
+    // currently written so that the robot can accelerate from rest to full speed in 1 second
+    // the turning speed also varies with the speed of the robot, turning slower at lower speeds
+    // for better control when lining up
+    // there is also a special case when turning below 0.1 power, where the robot will turn at 0.25
+    // its maximum speed
+    // the max acceleration rate, scale factor for turning, and turning speed while not moving are
+    // all configurable from the dashboard
+    public void arcadeDriveDifferential(double x, double y) {
+        // difference between current velocity and commanded velocity in the y direction
+        double difV = y - v; 
+        double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
+    
+        if(difV > 0) {
+          v += (difV > maxDifV) ? maxDifV : difV;
+        } else {
+          v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
+        }
+    
+        double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
+    
+    
+        double l = v - s;
+        double r = v + s;
+    
+    
+        rightControllers[0].setPower(r);
+        leftControllers[0].setPower(l);
+    }
+
+    // does the same thing as the other definition for this function, but deadbands the inputs to avoid
+    // any movement due to the sticks not returning to 0.0
+    public void arcadeDriveDifferential(double x, double y, double deadband) {
+        x = Utils.deadband(x, deadband);
+        y = Utils.deadband(y, deadband);
+    
+        // difference between current velocity and commanded velocity in the y direction
+        double difV = y - v;
+        double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
+    
+        if(difV > 0) {
+          v += (difV > maxDifV) ? maxDifV : difV;
+        } else {
+          v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
+        }
+    
+        double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
+    
+        double l = v - s;
+        double r = v + s;
+    
+    
         rightControllers[0].setPower(r);
         leftControllers[0].setPower(l);
     }
