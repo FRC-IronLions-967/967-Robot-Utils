@@ -27,6 +27,9 @@ public class XBoxController extends Joystick {
     private HashMap<String, JoystickButton> buttonMap;
     private HashMap<String, POVButton> povMap;
 
+    private boolean leftYInverted = false;
+    private boolean rightYInverted = false;
+
     /*
     * Creates a new XBoxController with the specified id.  The id's are usually assigned in the same order that the
     * controllers were plugged in.
@@ -126,11 +129,33 @@ public class XBoxController extends Joystick {
 
     /*
     * Checks whether the specified POV button is pressed
-    * @param button The string representation of the POV button, e.g. "N", "S", "E", "W", "NE", etc.
+    * @param povButton The string representation of the POV button, e.g. "N", "S", "E", "W", "NE", etc.
     * @return boolean This returns true if the button is pressed, false otherwise.
     */
     public boolean isPOVButtonPressed(String povButton) {
         return povMap.get(povButton).get();
+    }
+
+    /*
+    * Inverts the y-axis of the left stick.  XBox controllers have this axis inverted by default, so
+    * this can counteract that behavior.  Note that setting inversion to true results in inverting
+    * the controller from its factory default, and does NOT represent the default inverted state.
+    * @param inversion true to invert, false otherwise
+    * @return Nothing.
+    */
+    public void setLeftYInversion(boolean inversion) {
+        this.leftYInverted = inversion;
+    }
+
+    /*
+    * Inverts the y-axis of the right stick.  XBox controllers have this axis inverted by default, so
+    * this can counteract that behavior.  Note that setting inversion to true results in inverting
+    * the controller from its factory default, and does NOT represent the default inverted state.
+    * @param inversion true to invert, false otherwise
+    * @return Nothing.
+    */
+    public void setRightYInversion(boolean inversion) {
+        this.rightYInverted = inversion;
     }
 
     //these get the value between -1.0 and 1.0 that represent the various joysticks
@@ -149,7 +174,7 @@ public class XBoxController extends Joystick {
     * @return double The value of the y-axis of the right stick, which is between -1.0 and 1.0.
     */
     public double getRightStickY() {
-        return this.getRawAxis(RIGHT_Y_AXIS);
+        return (rightYInverted) ? -this.getRawAxis(RIGHT_Y_AXIS) : this.getRawAxis(RIGHT_Y_AXIS);
     }
 
     /*
@@ -181,7 +206,7 @@ public class XBoxController extends Joystick {
     * @return double The value of the y-axis of the left stick, which is between -1.0 and 1.0.
     */
     public double getLeftStickY() {
-        return this.getRawAxis(LEFT_Y_AXIS);
+        return (leftYInverted) ? -this.getRawAxis(LEFT_Y_AXIS) : this.getRawAxis(LEFT_Y_AXIS);
     }
 
     /*
