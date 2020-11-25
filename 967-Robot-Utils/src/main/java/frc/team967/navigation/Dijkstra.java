@@ -39,7 +39,6 @@ public class Dijkstra {
     }
 
     //standard convenience setter methods to alter values to run the algorithm again without creating a new object
-    //TODO
     public void changeGraph(int newGraph[][], int numNodes) throws Exception {
         if(newGraph[0].length != newGraph.length) {
             throw new Exception();
@@ -70,7 +69,7 @@ public class Dijkstra {
     public void runAlg(int src) {
         if(graph[0].length != graph.length || graph.length != numNodes) return; //check for bad conditions
 
-        for (int i = 0; i < numNodes; i++) { //defensive code in case the object's graph is updated and the vertices have thus not been checked
+        for (int i = 0; i < numNodes; i++) {
             dist[i] = INFINITE;
             verticesChecked[i] = false;
         }
