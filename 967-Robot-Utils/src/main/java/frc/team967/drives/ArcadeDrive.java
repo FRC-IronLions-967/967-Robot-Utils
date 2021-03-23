@@ -16,6 +16,24 @@ public class ArcadeDrive {
 
     private double v = 0.0;
 
+    // rate of turning when the forward velocity is zero
+    // used with the differential arcade drive method
+    private double zeroTurn = 0.5;
+
+    // rate of turning relative to the forward velocity of the robot
+    // uses a simple linear relationship where the turning axis is 
+    // multiplied by this scale and the throttle axis
+    private double scale = 0.5;
+
+    // maximum acceleration that the code will allow in one loop of the code
+    // at the 50 Hz default frequency for the periodic() methods in the
+    // subsystems, this equates to 1 second to go from rest to top speed
+    // assuming the drive setup is mechanically capable of this feat
+    private double maxAccel = 0.02;
+
+    // deadband value in drive functions
+    private double deadband = 0.1;
+
     // creates a new arcade drive with the given motor ids on each side
     // only works if all of the drive uses the same type of motors
     // the MotorController at index 0 will be treated as the master
@@ -78,6 +96,46 @@ public class ArcadeDrive {
         for(int i = 1; i < rightControllers.length; i++) rightControllers[i].follow(rightControllers[0]);
     }
 
+    // change the scale factor for turning in the differential method
+    public void setScale(double scale) {
+        this.scale = scale;
+    }
+
+    // get the current turning scale factor
+    public double getScale() {
+        return scale;
+    }
+
+    // change the turning rate when not moving
+    public void setZeroTurn(double zeroTurn) {
+        this.zeroTurn = zeroTurn;
+    }
+
+    // get the current turning rate when not moving
+    public double getZeroTurn() {
+        return zeroTurn;
+    }
+
+    // change the maximum acceleration allowed in a single loop
+    public void setMaxAccel(double maxAccel) {
+        this.maxAccel = maxAccel;
+    }
+
+    // get the current maximum acceleration value
+    public double getMaxAccel() {
+        return maxAccel;
+    }
+
+    // change the deadband value
+    public void setDeadband(double deadband) {
+        this.deadband = deadband;
+    }
+
+    // get the current deadband value
+    public double getDeadband() {
+        return deadband;
+    }
+
     // enables the lookup table in this instance
     public void enableLookup() {
         this.usingLookup = true;
@@ -108,31 +166,14 @@ public class ArcadeDrive {
         return rightControllers;
     }
 
-    public void arcadeDrive(double x, double y) {
-        double r, l;
-
-        if(usingLookup) {
-            r = ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]) - ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]);
-            l = ((y > 0) ? lookupTable[(int) Math.floor(Math.abs(y) * 100)] : -lookupTable[(int) Math.floor(Math.abs(y) * 100)]) + ((x > 0) ? lookupTable[(int) Math.floor(Math.abs(x) * 100)] : -lookupTable[(int) Math.floor(Math.abs(x) * 100)]);
-        } else {
-            r = y - x;
-            l = y + x;
-        }
-
-        // v doesn't affect this method at all, but it's being updated in case for some reason someone
-        // wanted to use both this and the differential methods in the same program
-        v = r + x;
-
-        rightControllers[0].setPower(r);
-        leftControllers[0].setPower(l);
-    }
-
     // standard arcade drive, is the horizontal (steering) axis, and y is the vertical (drive) axis
     // bear in mind that most controllers, such as XBox controllers are inverted on the vertical axis
     // of the analog sticks, so you may have to adjust for that
-    public void arcadeDrive(double x, double y, double deadband) {
-        x = Utils.deadband(x, deadband);
-        y = Utils.deadband(y, deadband);
+    public void arcadeDrive(double x, double y, boolean usingDeadband) {
+        if(usingDeadband) {
+            x = Utils.deadband(x, deadband);
+            y = Utils.deadband(y, deadband);
+        }
 
         double r, l;
 
@@ -156,35 +197,11 @@ public class ArcadeDrive {
     // for better control when lining up
     // there is also a special case when turning below 0.1 power, where the robot will turn at 0.25
     // its maximum speed
-    // the max acceleration rate, scale factor for turning, and turning speed while not moving are
-    // all configurable from the dashboard
-    public void arcadeDriveDifferential(double x, double y) {
-        // difference between current velocity and commanded velocity in the y direction
-        double difV = y - v; 
-        double maxDifV = SmartDashboard.getNumber("maxAccel", 0.02d);
-    
-        if(difV > 0) {
-          v += (difV > maxDifV) ? maxDifV : difV;
-        } else {
-          v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
+    public void arcadeDriveDifferential(double x, double y, boolean usingDeadband) {
+        if(usingDeadband) {
+            x = Utils.deadband(x, deadband);
+            y = Utils.deadband(y, deadband);
         }
-    
-        double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
-    
-    
-        double l = v - s;
-        double r = v + s;
-    
-    
-        rightControllers[0].setPower(r);
-        leftControllers[0].setPower(l);
-    }
-
-    // does the same thing as the other definition for this function, but deadbands the inputs to avoid
-    // any movement due to the sticks not returning to 0.0
-    public void arcadeDriveDifferential(double x, double y, double deadband) {
-        x = Utils.deadband(x, deadband);
-        y = Utils.deadband(y, deadband);
     
         // difference between current velocity and commanded velocity in the y direction
         double difV = y - v;
@@ -196,7 +213,7 @@ public class ArcadeDrive {
           v -= (Math.abs(difV) > maxDifV) ? maxDifV : Math.abs(difV);
         }
     
-        double s = (Math.abs(v) < 0.1) ? SmartDashboard.getNumber("scale", 0.5d) * x * SmartDashboard.getNumber("zeroTurn", 0.5d) : SmartDashboard.getNumber("scale", 0.5) * x * v;
+        double s = (Math.abs(v) < 0.1) ? scale * x * zeroTurn : scale * x * v;
     
         double l = v - s;
         double r = v + s;
